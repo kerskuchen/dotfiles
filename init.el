@@ -7,6 +7,12 @@
 ;;   We need to bulk convert them to unix lf. Currently we can run the following command in a git bash:
 ;;     find . -name "*.el" -exec dos2unix {} \;
 ;;   later we may want to automate this
+;; - implement the following function family to make searching easier
+;;   (defun swiper-start-or-resume-search-forward)
+;;   (defun swiper-start-or-resume-search-backward)
+;;   (defun swiper-resume-search-forward)
+;;   (defun swiper-resume-search-backward)
+;; - switch to left/right window should create a new window if it does not exist
 
 
 
@@ -132,10 +138,6 @@
 ;; Initialize package manager
 
 (require 'package)
-(require 'use-package)
-(require 'use-package-ensure)
-(setq use-package-always-ensure t)   ; Makes it so that `use-package` always implicitly uses :ensure t
-(setq package-enable-at-startup nil) ; Tells emacs not to load any packages before starting up
 ;; The following lines tell emacs where to look for new packages
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
                          ("org"   . "https://orgmode.org/elpa/")
@@ -150,6 +152,11 @@
 (unless (package-installed-p 'use-package) ; Unless it is already installed
   (package-install 'use-package))          ; Install the most recent version of use-package
 
+(require 'use-package)
+(require 'use-package-ensure)
+(setq use-package-always-ensure t)   ; Makes it so that `use-package` always implicitly uses :ensure t
+(setq package-enable-at-startup nil) ; Tells emacs not to load any packages before starting up
+
 ;;//////////////////////////////////////////////////////////////////////////////////////////////////
 ;; UI
 
@@ -161,12 +168,15 @@
 (use-package doom-themes
   :config
   (load-theme 'doom-dracula t))
+
 ;; More modern and less cluttered modeline at the bottom of the screen
-;; NOTE: The first time we load this config on a new machine, we need to run the following command interactively:
-;; M-x all-the-icons-install-fonts
-(use-package all-the-icons)
 (use-package doom-modeline
   :config (doom-modeline-mode 1))
+
+;; Icons for mode line and other things
+;; NOTE: The first time we load this config on a new machine, we need to run the following command interactively:
+;; M-x nerd-icons-install-fonts
+(use-package nerd-icons)
 
 ;; Fill column indicator
 (use-package fill-column-indicator :ensure t
@@ -212,29 +222,31 @@
 ;; Generally improved searching and Emacs navigation packages
 (use-package ivy
   :diminish (ivy-mode . "") ; Hides the 'ivy' in the minor-mode list in the mode line at bottom
-  :bind (:map ivy-minibuffer-map
-	 ("TAB" . ivy-alt-done)
-	 ("C-l" . ivy-alt-done)
-	 ("C-j" . ivy-next-line)
-	 ("C-k" . ivy-previous-line)
-	 :map ivy-switch-buffer-map
-	 ("C-k" . ivy-previous-line)
-	 ("C-l" . ivy-alt-done)
-	 ("C-d" . ivy-switch-buffer-kill)
-	 :map ivy-reverse-i-search-map
-	 ("C-k" . ivy-previous-line)
-	 ("C-d" . ivy-reverse-i-search-kill))
+  :bind (
+    :map ivy-minibuffer-map
+	("TAB" . ivy-alt-done)
+	("C-l" . ivy-alt-done)
+	("C-j" . ivy-next-line)
+	("C-k" . ivy-previous-line)
+	:map ivy-switch-buffer-map
+	("C-k" . ivy-previous-line)
+	("C-l" . ivy-alt-done)
+	("C-d" . ivy-switch-buffer-kill)
+	:map ivy-reverse-i-search-map
+	("C-k" . ivy-previous-line)
+	("C-d" . ivy-reverse-i-search-kill))
   :config
-  (ivy-mode 1))
+    (ivy-mode 1))
 (use-package swiper)
 (use-package counsel
-  :bind (("M-x"     . counsel-M-x)
-	 ("M-b"   . counsel-ibuffer)
-	 ("C-x C-f" . counsel-find-file)
-	 :map minibuffer-local-map
-	 ("C-r"     . 'counsel-minibuffer-history))
+  :bind (
+    ("M-x"     . counsel-M-x)
+	("M-b"     . counsel-ibuffer)
+	("C-x C-f" . counsel-find-file)
+	:map minibuffer-local-map
+	("C-r"     . 'counsel-minibuffer-history))
   :config
-  (setq ivy-initial-inputs-alist nil)) ; Don't start searches with ^
+    (setq ivy-initial-inputs-alist nil)) ; Don't start searches with ^
 
 ;; Show more descriptions for when running commands, switching buffers, installing packages etc.
 (use-package ivy-rich
@@ -336,9 +348,14 @@
 (define-key input-decode-map "\e[1;3C" [M-right])
 (define-key input-decode-map "\e[1;3D" [M-left])
 
+(global-set-key [f3] 'ivy-next-line-or-history)
+(global-set-key [(shift f3)] 'ivy-previous-line-or-history)
+
 (general-define-key
+
  :states '(normal insert visual emacs org)
- "C-f"  'swiper
+ "C-f"  'swiper-isearch-thing-at-point
+
  "C-s"  'save-buffer
  "C-w"  'kill-this-buffer
  "M-w"  'kill-this-buffer
@@ -353,8 +370,8 @@
  "M-l" 'next-buffer
  "<M-left>" 'previous-buffer
  "<M-right>" 'next-buffer
- "\M-1" 'evil-window-left
- "\M-2" 'evil-window-right
- "\M-3" 'evil-window-bottom
- "\M-4" 'evil-window-top
+ "M-1" 'evil-window-left
+ "M-2" 'evil-window-right
+ "M-3" 'evil-window-bottom
+ "M-4" 'evil-window-top
 )
