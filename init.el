@@ -49,9 +49,9 @@
 
 ;; Disable line numbers for some modes (TODO enable fringe mode 10 here)
 (dolist (mode '(org-mode-hook
-		term-mode-hook
-		shell-mode-hook
-		eshell-mode-hook))
+                term-mode-hook
+                shell-mode-hook
+                eshell-mode-hook))
   (add-hook mode (lambda() ((display-line-numbers-mode 0)
 			    (set-fringe-mode 5) ; Leaves a little space around the buffer
 			    ))))
@@ -268,7 +268,7 @@
   :diminish which-key-mode ; Don't show up as minor mode in the modeline
   :config
   (which-key-mode)
-  (setq which-key-idle-delay 0.3))
+  (setq which-key-idle-delay 0.0))
 
 (use-package projectile
   :diminish projectile-mode
@@ -305,6 +305,7 @@
   :keymaps '(normal insert visual emacs sly-editing-mode-map)
   "t"  '(:ignore t :which-key "toggles")
   "tt" '(counsel-load-theme :which-key "choose theme")
+
   "f"  '(:ignore f :which-key "file")
   "fs" '(save-buffer :which-key "save")
   "fx" '(kill-this-buffer :which-key "close")
@@ -312,9 +313,10 @@
   "fb" '(previous-buffer :which-key "previous")
   "fi" '(find-user-init-file :which-key "init.el")
   "ff" '(counsel-find-file :which-key "find")
+
   "e"  '(:ignore e :which-key "evaluate")
-  "ee" '(eval-defun :which-key "defun")
-  "el" '(eval :which-key "last expression")
+  "ef" '(eval-defun :which-key "defun")
+  "ee" '(eval-last-sexp :which-key "last expression")
   "eb" '(eval-buffer :which-key "buffer")
   "er" '(eval-region :which-key "region")
   "ei" '(eval :which-key "interactive")
