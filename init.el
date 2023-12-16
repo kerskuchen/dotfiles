@@ -15,6 +15,9 @@
 ;;     it either uses current selection or symbol under cursor or last search
 ;; - switch to left/right window should create a new window if it does not exist
 ;; - toggle between bottom top window (like terminal or minibuffer)
+;; - emacs default tabline is not useful. we need to make our own apparently
+;;   https://andreyor.st/posts/2020-05-07-making-emacs-tabs-work-like-in-atom/
+;;   https://jdhao.github.io/2021/09/30/emacs_custom_tabline/
 
 
 
@@ -204,6 +207,27 @@
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 
+;; Add open buffer tabs
+(global-tab-line-mode t)
+(setq tab-line-new-button-show nil) ; Do not show add-new button
+(setq tab-line-close-button-show nil) ; Do not show close button
+(setq tab-line-separator " | ") ; Do not show separators
+;; tab color settings
+;; (set-face-attribute 'tab-line nil ;; background behind tabs
+;;       :background "gray40"
+;;       :foreground "gray60" :distant-foreground "gray50"
+;;       :height 1.0 :box nil)
+(set-face-attribute 'tab-line-tab nil ;; active tab in another window
+      :inherit 'tab-line
+      :foreground "white" :background "gray40" :weight 'bold :box nil)
+(set-face-attribute 'tab-line-tab-current nil ;; active tab in current window
+      :background "#505090" :foreground "white" :weight 'bold :box nil)
+;; (set-face-attribute 'tab-line-tab-inactive nil ;; inactive tab
+;;       :background "gray60" :foreground "black" :box nil)
+;; (set-face-attribute 'tab-line-highlight nil ;; mouseover
+;;       :background "white" :foreground 'unspecified)
+
+
 ;;//////////////////////////////////////////////////////////////////////////////////////////////////
 ;; Editing / Keybinding
 
@@ -320,7 +344,7 @@
   :global-prefix "C-SPC")
 
 (kerskuchen/leader-keys
-  :keymaps '(normal insert visual emacs sly-editing-mode-map)
+  :keymaps '(normal visual emacs)
   "t"  '(:ignore t :which-key "toggles")
   "tt" '(counsel-load-theme :which-key "choose theme")
 
@@ -342,7 +366,7 @@
 )
 
 (kerskuchen/leader-keys
-  :keymaps '(normal insert visual emacs sly-editing-mode-map)
+  :keymaps '(normal visual emacs)
   "c"  '(:ignore c :which-key "compile")
   "cc" '(sly-compile-defun :which-key "defun")
   "cf" '(sly-compile-file :which-key "file")
@@ -369,13 +393,13 @@
 (define-key input-decode-map "\e[1;3C" [M-right])
 (define-key input-decode-map "\e[1;3D" [M-left])
 
-(global-set-key [f3] 'ctrlf-next-match)
-(global-set-key [(shift f3)] 'ctrlf-previous-match)
-
+;; NOTE: We can use C-h-c or C-h-k to let emacs describe to us what a key is called
 (general-define-key
+ "C-f"    'ctrlf-forward-fuzzy
+ "<f3>"   'ctrlf-next-match
+ "S-<f3>" 'ctrlf-previous-match
 
  :states '(normal insert visual emacs org)
- "C-f"  'ctrlf-forward-symbol-at-point
 
  "C-/"  'comment-or-uncomment-region
 
@@ -389,6 +413,10 @@
  "C-+"  'text-scale-increase
  "C--"  'text-scale-decrease
 
+ "C-<prior>" 'previous-buffer ; Ctrl-PageUp
+ "C-<next>" 'next-buffer      ; Ctrl-PageDown
+ "M-<prior>" 'previous-buffer ; Alt-PageUp
+ "M-<next>" 'next-buffer      ; Alt-PageDown
  "M-h" 'previous-buffer
  "M-l" 'next-buffer
  "<M-left>" 'previous-buffer
