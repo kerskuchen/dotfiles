@@ -7,12 +7,14 @@
 ;;   We need to bulk convert them to unix lf. Currently we can run the following command in a git bash:
 ;;     find . -name "*.el" -exec dos2unix {} \;
 ;;   later we may want to automate this
-;; - implement the following function family to make searching easier
-;;   (defun swiper-start-or-resume-search-forward)
-;;   (defun swiper-start-or-resume-search-backward)
-;;   (defun swiper-resume-search-forward)
-;;   (defun swiper-resume-search-backward)
+;; - implement search like it would work in modern software.
+;;    package ctrlf already does most of the things but is not quite there yet and needs some tweaking
+;;   - center on selection when doing `ctrlf-next-match` and `ctrlf-previous-match`
+;;   - f3 resumes previous search if search was not active before and jumps to the next match
+;;   - ctrl-f starts new search (without jumping to the next match).
+;;     it either uses current selection or symbol under cursor or last search
 ;; - switch to left/right window should create a new window if it does not exist
+;; - toggle between bottom top window (like terminal or minibuffer)
 
 
 
@@ -27,7 +29,7 @@
 (setq gc-cons-threshold 256000000)
 (add-hook 'after-init-hook #'(lambda ()
                                ;; restore after startup
-                               (setq gc-cons-threshold 800000))
+                               (setq gc-cons-threshold 8000000))
 )
 
 (setq inhibit-startup-message t) ; No splash
@@ -56,7 +58,7 @@
 			    (set-fringe-mode 5) ; Leaves a little space around the buffer
 			    ))))
 
-;; Restore last session on startup
+;; Automatically save and restore sessions on startup
 (desktop-save-mode 1)
 
 ;; Show trailing whitespace and EOF
@@ -98,7 +100,7 @@
 
 ;; Write customizations to a separate file instead of this file.
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-(load custom-file t)
+(load custom-file 'noerror 'nomessage)
 
 ;; Highlight the line we are currently on
 (global-hl-line-mode t)
@@ -115,6 +117,19 @@
 ;; Change tab key behavior to insert spaces instead
 (setq-default indent-tabs-mode nil)
 (setq tab-width 4)
+
+;; Keep track of recent files
+(recentf-mode 1)
+
+;; Keep track of entered minibuffer commands (use M-p to use previous history)
+(setq history-length 25)
+(savehist-mode 1)
+
+;; Remember and restore the last cursor location of opened files
+(save-place-mode 1)
+
+;; Automatically look for changes on disk for open buffers and refresh contents if something has changed
+(global-auto-revert-mode 1)
 
 
 ;;//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -176,6 +191,7 @@
 ;; Icons for mode line and other things
 ;; NOTE: The first time we load this config on a new machine, we need to run the following command interactively:
 ;; M-x nerd-icons-install-fonts
+;; After that we need to install the fonts on our system
 (use-package nerd-icons)
 
 ;; Fill column indicator
@@ -219,6 +235,11 @@
   :config
   (evil-collection-init))
 
+;; Searching with Ctrl-F like in other modern software
+(use-package ctrlf)
+(ctrlf-mode +1)
+
+
 ;; Generally improved searching and Emacs navigation packages
 (use-package ivy
   :diminish (ivy-mode . "") ; Hides the 'ivy' in the minor-mode list in the mode line at bottom
@@ -239,12 +260,8 @@
     (ivy-mode 1))
 (use-package swiper)
 (use-package counsel
-  :bind (
-    ("M-x"     . counsel-M-x)
-	("M-b"     . counsel-ibuffer)
-	("C-x C-f" . counsel-find-file)
-	:map minibuffer-local-map
-	("C-r"     . 'counsel-minibuffer-history))
+  :bind
+  (("M-x"     . counsel-M-x))
   :config
     (setq ivy-initial-inputs-alist nil)) ; Don't start searches with ^
 
@@ -266,9 +283,10 @@
 ;; After typing a key command this shows us a list of possible followup key commands
 (use-package which-key
   :diminish which-key-mode ; Don't show up as minor mode in the modeline
+  :init
+  (setq which-key-idle-delay 0.0)
   :config
-  (which-key-mode)
-  (setq which-key-idle-delay 0.0))
+  (which-key-mode))
 
 (use-package projectile
   :diminish projectile-mode
@@ -307,6 +325,7 @@
   "tt" '(counsel-load-theme :which-key "choose theme")
 
   "f"  '(:ignore f :which-key "file")
+  "fr" '(recentf-open-files :which-key "recent")
   "fs" '(save-buffer :which-key "save")
   "fx" '(kill-this-buffer :which-key "close")
   "fn" '(next-buffer :which-key "next")
@@ -350,13 +369,15 @@
 (define-key input-decode-map "\e[1;3C" [M-right])
 (define-key input-decode-map "\e[1;3D" [M-left])
 
-(global-set-key [f3] 'ivy-next-line-or-history)
-(global-set-key [(shift f3)] 'ivy-previous-line-or-history)
+(global-set-key [f3] 'ctrlf-next-match)
+(global-set-key [(shift f3)] 'ctrlf-previous-match)
 
 (general-define-key
 
  :states '(normal insert visual emacs org)
- "C-f"  'swiper-isearch-thing-at-point
+ "C-f"  'ctrlf-forward-symbol-at-point
+
+ "C-/"  'comment-or-uncomment-region
 
  "C-s"  'save-buffer
  "C-w"  'kill-this-buffer
