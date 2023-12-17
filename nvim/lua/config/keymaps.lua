@@ -8,6 +8,9 @@
 --   term_mode         = "t",
 --   command_mode      = "c",
 
+local optsNone = {}
+local optsSilent = { silent = true}
+local optsNonRecursiveAndSilent = { noremap = true, silent = true}
 
 
 local function t(str)
@@ -34,9 +37,30 @@ function ToggleExplorer()
   end
 end
 
-local optsNone = {}
-local optsSilent = { silent = true}
-local optsNonRecursiveAndSilent = { noremap = true, silent = true}
+-- -- Debugstuff
+-- function WriteTextAtCursor(text)
+--   -- Get row and column cursor, use unpack because it's a tuple.
+--   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+--   -- Notice the text is given as an array parameter, you can pass multiple strings.
+--   -- Params 2-5 are for start and end of row and columns.
+--   -- See earlier docs for param clarification or `:help nvim_buf_set_text.
+--   vim.api.nvim_buf_set_text(0, row - 1, col, row - 1, col, { text })
+-- end
+-- 
+-- function GetCurrentWindowProperties()
+--   local win_number = vim.api.nvim_get_current_win()
+--   local v = vim.wo[win_number]
+--   local all_options = vim.api.nvim_get_all_options_info()
+--   local result = ""
+--   for key, val in pairs(all_options) do
+--       if val.global_local == false and val.scope == "win" then
+--           result = result .. " | " .. key .. "=" .. tostring(v[key] or "<not set>")
+--       end
+--   end
+--   WriteTextAtCursor(result)
+-- end
+-- 
+-- vim.keymap.set("n", "<M-p>", GetCurrentWindowProperties, optsNonRecursiveAndSilent)
 
 --------------------------------------------
 -- Modern Default Editor Shortcuts
@@ -56,12 +80,10 @@ vim.keymap.set("i", "<C-s>", "<ESC>:w<CR>i", optsNonRecursiveAndSilent)
 
 --------------------------------------------
 -- Explorer
-vim.keymap.set("n", "<C-S-e>", ToggleExplorer, optsSilent)
-vim.keymap.set("i", "<C-S-e>", ToggleExplorer, optsSilent)
-vim.keymap.set("n", "<C-S-E>", ToggleExplorer, optsSilent)
-vim.keymap.set("i", "<C-S-E>", ToggleExplorer, optsSilent)
-vim.keymap.set("n", "<C-E>", ToggleExplorer, optsSilent)
-vim.keymap.set("i", "<C-E>", ToggleExplorer, optsSilent)
+
+vim.keymap.set("n", "<M-e>", ToggleExplorer, optsNonRecursiveAndSilent)
+vim.keymap.set("n", "<leader>te", ToggleExplorer, optsNonRecursiveAndSilent)
+vim.keymap.set("n", "<leader>fc", ":cd %:h<CR>", optsNonRecursiveAndSilent) -- Goto current files working directory
 
 --------------------------------------------
 -- Navigation
@@ -70,7 +92,25 @@ vim.keymap.set("n", "<M-u>", "<C-u>", optsNonRecursiveAndSilent) -- Scroll up
 vim.keymap.set("n", "<M-d>", "<C-d>", optsNonRecursiveAndSilent) -- Scroll down
 
 --------------------------------------------
--- Split navigation
+-- Commenting
+
+-- apparently non of this shit is working to just rebind <C-/> to comment out a line - yeah in 2023
+-- vim.keymap.set("n", "<C-/>", "gcc", optsNonRecursiveAndSilent) -- NOTE 'gcc' provided by comment plugin
+-- vim.keymap.set("v", "<C-/>", "gcc", optsNonRecursiveAndSilent) -- NOTE 'gcc' provided by comment plugin
+-- vim.keymap.set("n", "<C-?>", "gcc", optsNonRecursiveAndSilent) -- NOTE 'gcc' provided by comment plugin
+-- vim.keymap.set("v", "<C-?>", "gcc", optsNonRecursiveAndSilent) -- NOTE 'gcc' provided by comment plugin
+-- vim.keymap.set("n", "<C-_>", "gcc", optsNonRecursiveAndSilent) -- NOTE 'gcc' provided by comment plugin
+-- vim.keymap.set("v", "<C-_>", "gcc", optsNonRecursiveAndSilent) -- NOTE 'gcc' provided by comment plugin
+-- vim.keymap.set("n", "<C-_>", "gcc", optsNonRecursiveAndSilent) -- NOTE 'gcc' provided by comment plugin
+-- vim.keymap.set("n", "<C-s-/>", "gcc", optsNonRecursiveAndSilent) -- NOTE 'gcc' provided by comment plugin
+-- vim.keymap.set("v", "<C-s-/>", "gcc", optsNonRecursiveAndSilent) -- NOTE 'gcc' provided by comment plugin
+
+--------------------------------------------
+-- Splits
+
+vim.keymap.set("n", "<leader>sv", ":vsplit<CR>", optsNonRecursiveAndSilent) -- Split vertically
+vim.keymap.set("n", "<leader>sh", ":hsplit<CR>", optsNonRecursiveAndSilent) -- Split horizontally
+vim.keymap.set("n", "<leader>sc", ":close<CR>", optsNonRecursiveAndSilent) -- Close split
 
 -- Better window-split navigation
 vim.keymap.set("n", "<M-1>", "<C-w>h", optsNonRecursiveAndSilent) -- Navigate left

@@ -3,6 +3,9 @@
 -- We can also get a list of all settable options with
 -- :set all
 
+-- Set working directory to config file path
+vim.cmd(":cd " .. vim.api.nvim_eval("stdpath('config')"))
+
 ----------------------------------------------------------------------------------------------------
 -- Tabs and indentation
 
