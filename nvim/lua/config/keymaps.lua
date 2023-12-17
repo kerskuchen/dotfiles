@@ -11,6 +11,7 @@
 local optsNone = {}
 local optsSilent = { silent = true}
 local optsNonRecursiveAndSilent = { noremap = true, silent = true}
+local optsNonRecursive = { noremap = true }
 
 
 local function t(str)
@@ -35,6 +36,12 @@ function ToggleExplorer()
   else
     nvimTreeAPI.tree.open()
   end
+end
+
+
+local commentAPI = require("Comment.api")
+function ToggleLineComment()
+  commentAPI.toggle()
 end
 
 -- -- Debugstuff
@@ -78,6 +85,12 @@ vim.keymap.set("i", "<C-v>", "<ESC>pi", optsNonRecursiveAndSilent)
 vim.keymap.set("n", "<C-s>", ":w<CR>", optsNonRecursiveAndSilent)
 vim.keymap.set("i", "<C-s>", "<ESC>:w<CR>i", optsNonRecursiveAndSilent)
 
+-- Searching
+vim.keymap.set("n", "<C-f>", "/", optsNonRecursive)
+vim.keymap.set("n", "<C-f>", "<ESC>/", optsNonRecursive)
+vim.keymap.set("n", "<f3>", "n", optsNonRecursive)
+vim.keymap.set("n", "<s-F3>", "N", optsNonRecursive)
+
 --------------------------------------------
 -- Explorer
 
@@ -90,11 +103,15 @@ vim.keymap.set("n", "<leader>fc", ":cd %:h<CR>", optsNonRecursiveAndSilent) -- G
 
 vim.keymap.set("n", "<M-u>", "<C-u>", optsNonRecursiveAndSilent) -- Scroll up
 vim.keymap.set("n", "<M-d>", "<C-d>", optsNonRecursiveAndSilent) -- Scroll down
+vim.keymap.set("v", "<M-u>", "<C-u>", optsNonRecursiveAndSilent) -- Scroll up
+vim.keymap.set("v", "<M-d>", "<C-d>", optsNonRecursiveAndSilent) -- Scroll down
+vim.keymap.set("x", "<M-u>", "<C-u>", optsNonRecursiveAndSilent) -- Scroll up
+vim.keymap.set("x", "<M-d>", "<C-d>", optsNonRecursiveAndSilent) -- Scroll down
 
 --------------------------------------------
 -- Commenting
 
--- apparently non of this shit is working to just rebind <C-/> to comment out a line - yeah in 2023
+-- apparently non of this shit is working to just rebind to comment out a line - yeah in 2023
 -- vim.keymap.set("n", "<C-/>", "gcc", optsNonRecursiveAndSilent) -- NOTE 'gcc' provided by comment plugin
 -- vim.keymap.set("v", "<C-/>", "gcc", optsNonRecursiveAndSilent) -- NOTE 'gcc' provided by comment plugin
 -- vim.keymap.set("n", "<C-?>", "gcc", optsNonRecursiveAndSilent) -- NOTE 'gcc' provided by comment plugin
@@ -104,8 +121,10 @@ vim.keymap.set("n", "<M-d>", "<C-d>", optsNonRecursiveAndSilent) -- Scroll down
 -- vim.keymap.set("n", "<C-_>", "gcc", optsNonRecursiveAndSilent) -- NOTE 'gcc' provided by comment plugin
 -- vim.keymap.set("n", "<C-s-/>", "gcc", optsNonRecursiveAndSilent) -- NOTE 'gcc' provided by comment plugin
 -- vim.keymap.set("v", "<C-s-/>", "gcc", optsNonRecursiveAndSilent) -- NOTE 'gcc' provided by comment plugin
+vim.keymap.set("n", "<leader>kk", "gcc", optsNonRecursive) -- NOTE 'gcc' provided by comment plugin
+vim.keymap.set("v", "<leader>kk", "gcc", optsNonRecursive) -- NOTE 'gcc' provided by comment plugin
 
---------------------------------------------
+------------------------------------------
 -- Splits
 
 vim.keymap.set("n", "<leader>sv", ":vsplit<CR>", optsNonRecursiveAndSilent) -- Split vertically

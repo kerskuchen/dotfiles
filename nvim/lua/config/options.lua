@@ -4,7 +4,17 @@
 -- :set all
 
 -- Set working directory to config file path
+-- TODO: Later we want to check if our workind dir is the executable dir and only then change it to config dir
 vim.cmd(":cd " .. vim.api.nvim_eval("stdpath('config')"))
+
+
+----------------------------------------------------------------------------------------------------
+-- Neovide GUI specific
+
+if vim.g.neovide then
+    vim.g.neovide_cursor_animation_length = 0.02
+    vim.g.neovide_cursor_vfx_mode = "pixiedust"
+end
 
 ----------------------------------------------------------------------------------------------------
 -- Tabs and indentation
