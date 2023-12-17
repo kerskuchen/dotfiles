@@ -1,0 +1,121 @@
+-- Keycodes can be found in https://neovim.io/doc/user/intro.html#key-codes
+
+-- Modes:
+--   normal_mode       = "n",
+--   insert_mode       = "i",
+--   visual_mode       = "v",
+--   visual_block_mode = "x",
+--   term_mode         = "t",
+--   command_mode      = "c",
+
+
+
+local function t(str)
+    return vim.api.nvim_replace_termcodes(str, true, true, true)
+end
+
+function startswith(text, prefix)
+    return text:find(prefix, 1, true) == 1
+end
+
+local nvimTreeAPI = require("nvim-tree.api")
+function ToggleExplorer() 
+  if nvimTreeAPI.tree.is_visible() then
+    local curBufferName = vim.api.nvim_buf_get_name(0)
+    nvimTreeAPI.tree.close_in_all_tabs()
+    if startswith(curBufferName, "NvimTree") then
+      -- also close the split where the explorer was in because we don't want that weird vertical 
+      -- split to stay open. Apparently `nvimTreeAPI.tree.close_in_all_tabs()` does only close the 
+      -- buffer and not the split it is contained in
+      vim.api.nvim_win_close()
+    end
+  else
+    nvimTreeAPI.tree.open()
+  end
+end
+
+local optsNone = {}
+local optsSilent = { silent = true}
+local optsNonRecursiveAndSilent = { noremap = true, silent = true}
+
+--------------------------------------------
+-- Modern Default Editor Shortcuts
+
+-- Undo / Redo
+vim.keymap.set("n", "<C-z>", ":undo<CR>", optsNonRecursiveAndSilent)
+vim.keymap.set("i", "<C-z>", "<ESC>:undo<CR>i", optsNonRecursiveAndSilent)
+vim.keymap.set("n", "<C-y>", ":redo<CR>", optsNonRecursiveAndSilent)
+vim.keymap.set("i", "<C-y>", "<ESC>:redo<CR>i", optsNonRecursiveAndSilent)
+
+-- Paste
+vim.keymap.set("i", "<C-v>", "<ESC>pi", optsNonRecursiveAndSilent)
+
+-- Saving
+vim.keymap.set("n", "<C-s>", ":w<CR>", optsNonRecursiveAndSilent)
+vim.keymap.set("i", "<C-s>", "<ESC>:w<CR>i", optsNonRecursiveAndSilent)
+
+--------------------------------------------
+-- Explorer
+vim.keymap.set("n", "<C-S-e>", ToggleExplorer, optsSilent)
+vim.keymap.set("i", "<C-S-e>", ToggleExplorer, optsSilent)
+vim.keymap.set("n", "<C-S-E>", ToggleExplorer, optsSilent)
+vim.keymap.set("i", "<C-S-E>", ToggleExplorer, optsSilent)
+vim.keymap.set("n", "<C-E>", ToggleExplorer, optsSilent)
+vim.keymap.set("i", "<C-E>", ToggleExplorer, optsSilent)
+
+--------------------------------------------
+-- Navigation
+
+vim.keymap.set("n", "<M-u>", "<C-u>", optsNonRecursiveAndSilent) -- Scroll up
+vim.keymap.set("n", "<M-d>", "<C-d>", optsNonRecursiveAndSilent) -- Scroll down
+
+--------------------------------------------
+-- Split navigation
+
+-- Better window-split navigation
+vim.keymap.set("n", "<M-1>", "<C-w>h", optsNonRecursiveAndSilent) -- Navigate left
+vim.keymap.set("n", "<M-2>", "<C-w>l", optsNonRecursiveAndSilent) -- Navigate right
+
+vim.keymap.set("n", "<C-h>", "<C-w>h", optsNonRecursiveAndSilent) -- Navigate left
+vim.keymap.set("n", "<C-l>", "<C-w>l", optsNonRecursiveAndSilent) -- Navigate right
+vim.keymap.set("n", "<C-k>", "<C-w>k", optsNonRecursiveAndSilent) -- Navigate up
+vim.keymap.set("n", "<C-j>", "<C-w>j", optsNonRecursiveAndSilent) -- Navigate down
+
+-- Resize window-splits with arrows
+vim.keymap.set("n", "<C-Up>", ":resize +2<CR>", optsNonRecursiveAndSilent)
+vim.keymap.set("n", "<C-Down>", ":resize -2<CR>", optsNonRecursiveAndSilent)
+vim.keymap.set("n", "<C-Left>", ":vertical resize -2<CR>", optsNonRecursiveAndSilent)
+vim.keymap.set("n", "<C-Right>", ":vertical resize +2<CR>", optsNonRecursiveAndSilent)
+
+--------------------------------------------
+-- Visual mode
+
+-- Stay in indent mode
+vim.keymap.set("v", "<", "<gv", optsNonRecursiveAndSilent)
+vim.keymap.set("v", ">", ">gv", optsNonRecursiveAndSilent)
+
+-- Move selected text block up and down
+vim.keymap.set("v", "<A-j>", ":m .+1<CR>==", optsNonRecursiveAndSilent)
+vim.keymap.set("v", "<A-k>", ":m .-2<CR>==", optsNonRecursiveAndSilent)
+
+-- If we overwrite a selection by copy and pasting over it,
+-- we don't want the selection to overwrite our clipboard
+vim.keymap.set("v", "p", '"_dP', optsNonRecursiveAndSilent)
+
+--------------------------------------------
+-- Visual block mode
+
+-- Move selected text block up and down
+vim.keymap.set("x", "J", ":move '>+1<CR>gv-gv", optsNonRecursiveAndSilent)
+vim.keymap.set("x", "K", ":move '<-2<CR>gv-gv", optsNonRecursiveAndSilent)
+vim.keymap.set("x", "<A-j>", ":move '>+1<CR>gv-gv", optsNonRecursiveAndSilent)
+vim.keymap.set("x", "<A-k>", ":move '<-2<CR>gv-gv", optsNonRecursiveAndSilent)
+
+--------------------------------------------
+-- Terminal mode
+
+-- Better terminal navigation
+vim.keymap.set("t", "<C-h>", "<C-\\><C-N><C-w>h", optsSilent)
+vim.keymap.set("t", "<C-j>", "<C-\\><C-N><C-w>j", optsSilent)
+vim.keymap.set("t", "<C-k>", "<C-\\><C-N><C-w>k", optsSilent)
+vim.keymap.set("t", "<C-l>", "<C-\\><C-N><C-w>l", optsSilent)

@@ -96,7 +96,7 @@
 (setq default-fill-column 100)
 
 ;; Print a default message in the empty scratch buffer opened at startup
-(setq initial-scratch-message "Ok lets goooo :3")
+(setq initial-scratch-message "")
 
 ;; Lazy people like me never want to type "yes" when "y" will suffice
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -227,7 +227,6 @@
 ;; (set-face-attribute 'tab-line-highlight nil ;; mouseover
 ;;       :background "white" :foreground 'unspecified)
 
-
 ;;//////////////////////////////////////////////////////////////////////////////////////////////////
 ;; Editing / Keybinding
 
@@ -263,6 +262,14 @@
 (use-package ctrlf)
 (ctrlf-mode +1)
 
+;; Autocompletion framework
+(use-package company
+  :init
+  (setq company-idle-delay 0) ; Show completions immediately
+  :config
+  (add-hook 'after-init-hook 'global-company-mode))
+(with-eval-after-load 'company
+  (define-key company-mode-map (kbd "<tab>") 'company-complete-selection))
 
 ;; Generally improved searching and Emacs navigation packages
 (use-package ivy
@@ -340,20 +347,22 @@
 
 (general-create-definer kerskuchen/leader-keys
   :keymaps '(normal)
-  :prefix "SPC"
-  :global-prefix "C-SPC")
+  :prefix "SPC")
 
 (kerskuchen/leader-keys
   :keymaps '(normal visual emacs)
   "t"  '(:ignore t :which-key "toggles")
   "tt" '(counsel-load-theme :which-key "choose theme")
 
+  "r"  '(:ignore t :which-key "run")
+  "rt" '(shell :which-key "terminal")
+  "ri" '(ielm :which-key "interpreter")
+
   "f"  '(:ignore f :which-key "file")
   "fr" '(recentf-open-files :which-key "recent")
   "fs" '(save-buffer :which-key "save")
   "fx" '(kill-this-buffer :which-key "close")
-  "fn" '(next-buffer :which-key "next")
-  "fb" '(previous-buffer :which-key "previous")
+  "fn" '(scratch-buffer :which-key "new")
   "fi" '(find-user-init-file :which-key "init.el")
   "ff" '(counsel-find-file :which-key "find")
 
@@ -393,16 +402,21 @@
 (define-key input-decode-map "\e[1;3C" [M-right])
 (define-key input-decode-map "\e[1;3D" [M-left])
 
+
+(global-set-key (kbd "<f3>")   'ctrlf-next-match)
+(global-set-key (kbd "<S-f3>") 'ctrlf-previous-match)
+
 ;; NOTE: We can use C-h-c or C-h-k to let emacs describe to us what a key is called
 (general-define-key
  "C-f"    'ctrlf-forward-fuzzy
- "<f3>"   'ctrlf-next-match
- "S-<f3>" 'ctrlf-previous-match
 
  :states '(normal insert visual emacs org)
 
  "C-/"  'comment-or-uncomment-region
 
+ "C-SPC" 'company-manual-begin
+
+ "C-n"  'scratch-buffer
  "C-s"  'save-buffer
  "C-w"  'kill-this-buffer
  "M-w"  'kill-this-buffer
